@@ -1,0 +1,2 @@
+# Este projeto usa:
+- JWT
