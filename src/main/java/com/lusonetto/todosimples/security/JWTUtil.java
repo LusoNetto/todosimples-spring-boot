@@ -31,7 +31,7 @@ public class JWTUtil {
     }
 
     private SecretKey getKeyBySecret() {
-        SecretKey key = Keys.hmacShaKeyFor(this.secret.getBytes())
+        SecretKey key = Keys.hmacShaKeyFor(this.secret.getBytes());
         return key;
     }
 

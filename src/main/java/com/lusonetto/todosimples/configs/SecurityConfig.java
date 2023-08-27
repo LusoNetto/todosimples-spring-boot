@@ -19,6 +19,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.lusonetto.todosimples.security.JWTAuthenticationFilter;
 import com.lusonetto.todosimples.security.JWTUtil;
 
 @Configuration
@@ -47,21 +48,23 @@ public class SecurityConfig {
         
         http.cors().and().csrf().disable();
 
-        AuthenticationManagerBuilder authenticationManagerBuilder = http
-            .getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.userDetailsService(userDetailsService)
-            .passwordEncoder(bCryptPasswordEncoder());
-        this.authenticationManager = authenticationManagerBuilder.build();
+                AuthenticationManagerBuilder authenticationManagerBuilder = http
+                                .getSharedObject(AuthenticationManagerBuilder.class);
+                authenticationManagerBuilder.userDetailsService(this.userDetailsService)
+                                .passwordEncoder(bCryptPasswordEncoder());
+                this.authenticationManager = authenticationManagerBuilder.build();
 
+                http.authorizeRequests()
+                                .antMatchers(HttpMethod.POST, PUBLIC_MATCHERS_POST).permitAll()
+                                .antMatchers(PUBLIC_MATCHERS).permitAll()
+                                .anyRequest().authenticated().and()
+                                .authenticationManager(authenticationManager);
 
-        http.authorizeRequests()
-            .antMatchers(HttpMethod.POST, PUBLIC_MATCHERS_POST).permitAll()
-            .antMatchers(PUBLIC_MATCHERS).permitAll()
-            .anyRequest().authenticated();
+                http.addFilter(new JWTAuthenticationFilter(this.authenticationManager, this.jwtUtil));
 
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        
-        return http.build();
+                http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+                return http.build();
     }
 
     @Bean
